@@ -21,7 +21,7 @@ def upgrade() -> None:
 
     # 既存の全ユーザーの position を +1 してから 説明会 を position=1 に挿入
     conn.execute(text(
-        "UPDATE statuses SET position = position + 1 WHERE is_default = 1"
+        "UPDATE statuses SET position = position + 1 WHERE is_default = TRUE"
     ))
 
     users = conn.execute(text("SELECT id FROM users")).fetchall()
@@ -42,7 +42,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     conn = op.get_bind()
-    conn.execute(text("DELETE FROM statuses WHERE name = '説明会' AND is_default = 1"))
+    conn.execute(text("DELETE FROM statuses WHERE name = '説明会' AND is_default = TRUE"))
     conn.execute(text(
-        "UPDATE statuses SET position = position - 1 WHERE is_default = 1 AND position > 1"
+        "UPDATE statuses SET position = position - 1 WHERE is_default = TRUE AND position > 1"
     ))
