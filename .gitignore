@@ -1,0 +1,27 @@
+# 環境変数（機密情報）
+.env
+.env.local
+.env.*.local
+
+# Python
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/jobtrack.db
+
+# Node.js
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+
+# その他
+.DS_Store
+*.log
+.claude/
+.vscode/
+docker/
+docker-compose.yml
+start.ps1
+test.md
+CLOUDE.md
