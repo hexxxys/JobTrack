@@ -17,7 +17,7 @@ depends_on = None
 def upgrade() -> None:
     op.add_column(
         "user_settings",
-        sa.Column("calendar_sync_enabled", sa.Boolean(), nullable=False, server_default=sa.text("1")),
+        sa.Column("calendar_sync_enabled", sa.Boolean(), nullable=False, server_default=sa.text("true")),
     )
 
 

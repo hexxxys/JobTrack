@@ -20,8 +20,8 @@ def upgrade() -> None:
     op.create_table(
         "user_settings",
         sa.Column("user_id", sa.String(36), nullable=False),
-        sa.Column("show_archived_statuses", sa.Boolean(), nullable=False, server_default=sa.text("0")),
-        sa.Column("compact_cards", sa.Boolean(), nullable=False, server_default=sa.text("0")),
+        sa.Column("show_archived_statuses", sa.Boolean(), nullable=False, server_default=sa.text("false")),
+        sa.Column("compact_cards", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("upcoming_refresh_minutes", sa.Integer(), nullable=False, server_default=sa.text("1")),
         sa.Column("created_at", sa.DateTime(), nullable=False, server_default=NOW),
         sa.Column("updated_at", sa.DateTime(), nullable=False, server_default=NOW),
@@ -33,7 +33,7 @@ def upgrade() -> None:
         sa.text(
             """
             INSERT INTO user_settings (user_id, show_archived_statuses, compact_cards, upcoming_refresh_minutes)
-            SELECT id, 0, 0, 1 FROM users
+            SELECT id, false, false, 1 FROM users
             """
         )
     )
