@@ -61,10 +61,24 @@ def get_current_user(
 
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        # 初回ログイン時にユーザーを自動作成
         name = payload.get("name") or email
         google_id = payload.get("sub") or email
         image = payload.get("picture")
         user = _create_user_with_defaults(db, email, name, google_id, image)
+    else:
+        # ステータスが0件の場合（初回作成失敗）は補完する
+        count = db.query(Status).filter(Status.user_id == user.id).count()
+        if count == 0:
+            for s_name, color, position, is_archive in _DEFAULT_STATUSES:
+                db.add(Status(
+                    id=str(uuid4()),
+                    user_id=user.id,
+                    name=s_name,
+                    color=color,
+                    position=position,
+                    is_default=True,
+                    is_archive=is_archive,
+                ))
+            db.commit()
 
     return user
