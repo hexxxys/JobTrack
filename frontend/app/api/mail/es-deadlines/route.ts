@@ -185,12 +185,22 @@ export async function GET() {
     (l) => l.name.toLowerCase() === BOX_LABEL_NAME.toLowerCase()
   )
 
-  if (!label) {
+  // ラベルがなければ自動作成
+  const resolvedLabel = label ?? await gmailFetch<GmailLabel>("labels", accessToken, {
+    method: "POST",
+    body: JSON.stringify({
+      name: BOX_LABEL_NAME,
+      labelListVisibility: "labelShow",
+      messageListVisibility: "show",
+    }),
+  }).catch(() => null)
+
+  if (!resolvedLabel) {
     return NextResponse.json<MailPreviewOut>({ items: [], count: 0, label_found: false, label_id: undefined })
   }
 
   const msgList = await gmailFetch<GmailMessageList>(
-    `messages?labelIds=${encodeURIComponent(label.id)}&maxResults=20`,
+    `messages?labelIds=${encodeURIComponent(resolvedLabel.id)}&maxResults=20`,
     accessToken
   ).catch(() => ({ messages: [] as { id: string }[] }))
 
@@ -228,7 +238,7 @@ export async function GET() {
   try {
     const items = await extractWithClaude(validEmails)
     items.sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at))
-    return NextResponse.json<MailPreviewOut>({ items, count: items.length, label_found: true, label_id: label.id })
+    return NextResponse.json<MailPreviewOut>({ items, count: items.length, label_found: true, label_id: resolvedLabel.id })
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Claude API エラー"
     return NextResponse.json({ detail: msg }, { status: 502 })
