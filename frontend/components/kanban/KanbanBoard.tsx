@@ -196,7 +196,7 @@ export default function KanbanBoard() {
           className="fixed inset-0 z-50 flex items-start justify-end bg-black/30 p-4 pt-16"
           onClick={(e) => { if (e.target === e.currentTarget) setMailPanelOpen(false) }}
         >
-          <div className="w-full max-w-md overflow-y-auto rounded-xl shadow-2xl">
+          <div className="w-full max-w-md rounded-xl shadow-2xl flex flex-col max-h-[85vh]">
             <div className="flex items-center justify-between rounded-t-xl bg-slate-800 px-4 py-2.5">
               <span className="text-sm font-semibold text-white">メールから取り込む</span>
               <button

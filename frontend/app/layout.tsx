@@ -6,7 +6,7 @@ import Providers from "./providers"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "JobTrack — 就活選考管理",
+  title: "就勝つ — 就活選考管理",
   description: "就活の選考ステータスと締切をリアルタイムで管理するカンバンボード",
 }
 

@@ -101,7 +101,7 @@ export default function MailImportPanel() {
       }
     }
 
-    // 取り込み済みメールから JobTrack-ES-BOX ラベルを外す
+    // 取り込み済みメールから Syukatu-ES-BOX ラベルを外す
     if (done.length > 0 && preview.label_id) {
       await fetch("/api/mail/es-deadlines", {
         method: "POST",
@@ -131,7 +131,7 @@ export default function MailImportPanel() {
           <Mail size={16} className="text-blue-500" />
           <span className="text-sm font-semibold text-slate-800">メールから取り込む</span>
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
-            JobTrack-ES-BOX
+            Syukatu-ES-BOX
           </span>
         </div>
         <button
@@ -153,7 +153,7 @@ export default function MailImportPanel() {
 
       {preview && !preview.label_found && (
         <div className="px-4 py-6 text-center text-sm text-slate-500">
-          <p className="font-medium">Gmail に「JobTrack-ES-BOX」ラベルが見つかりません。</p>
+          <p className="font-medium">Gmail に「Syukatu-ES-BOX」ラベルが見つかりません。</p>
           <p className="mt-1 text-xs">Gmail でラベルを作成し、就活メールを移動してください。</p>
         </div>
       )}
@@ -173,7 +173,7 @@ export default function MailImportPanel() {
 
       {preview && preview.count > 0 && (
         <>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-100 max-h-[60vh] overflow-y-auto">
             {preview.items.map((item) => {
               const checked = selected.has(item.message_id)
               const expanded = expandedId === item.message_id

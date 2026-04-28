@@ -1,35 +1,40 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { signIn } from "@/auth"
-import { BriefcaseBusiness } from "lucide-react"
+import { Trophy } from "lucide-react"
 
 export default async function LoginPage() {
   const session = await auth()
   if (session) redirect("/kanban")
 
   return (
-    <div className="flex min-h-full flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg ring-1 ring-slate-200">
+    <div className="flex min-h-full flex-col items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800">
+      <div className="w-full max-w-sm rounded-3xl bg-white/10 backdrop-blur-sm p-8 shadow-2xl ring-1 ring-white/20">
         {/* ロゴ */}
         <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md">
-            <BriefcaseBusiness size={28} />
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-lg">
+            <Trophy size={32} />
           </div>
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-slate-800">JobTrack</h1>
-            <p className="mt-1 text-sm text-slate-500">就活選考をリアルタイムで管理</p>
+            <h1 className="text-3xl font-black text-white tracking-tight">就勝つ</h1>
+            <p className="mt-1 text-xs font-medium text-blue-200 tracking-widest uppercase">Syukatu</p>
           </div>
         </div>
 
+        {/* キャッチコピー */}
+        <p className="mb-6 text-center text-sm text-blue-100">
+          就活の選考を一元管理して、<br />内定を勝ち取ろう。
+        </p>
+
         {/* 特徴リスト */}
-        <ul className="mb-8 space-y-2 text-sm text-slate-600">
+        <ul className="mb-8 space-y-2">
           {[
-            "カンバンボードで選考状況を一目で把握",
-            "ES締切・面接日のカウントダウン表示",
-            "どのデバイスからでも即座に更新",
+            "カンバンボードで選考状況を可視化",
+            "ES締切・面接日のカウントダウン",
+            "メールから自動取り込み",
           ].map((feature) => (
-            <li key={feature} className="flex items-start gap-2">
-              <span className="mt-0.5 h-4 w-4 shrink-0 rounded-full bg-blue-100 text-blue-600 text-xs flex items-center justify-center font-bold">✓</span>
+            <li key={feature} className="flex items-center gap-2 text-sm text-blue-100">
+              <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/20 text-[10px] font-bold text-white">✓</span>
               {feature}
             </li>
           ))}
@@ -44,7 +49,7 @@ export default async function LoginPage() {
         >
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:shadow-md active:scale-[0.98]"
+            className="flex w-full items-center justify-center gap-3 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-md transition-all hover:bg-blue-50 hover:shadow-lg active:scale-[0.98]"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -55,10 +60,9 @@ export default async function LoginPage() {
             Googleでログイン
           </button>
         </form>
-
       </div>
 
-      <p className="mt-6 text-xs text-slate-400">
+      <p className="mt-6 text-xs text-blue-300">
         ログインすることで利用規約に同意したものとみなします
       </p>
     </div>

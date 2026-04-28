@@ -1,7 +1,7 @@
 import { auth, signOut } from "@/auth"
 import { redirect } from "next/navigation"
 import Image from "next/image"
-import { BriefcaseBusiness, LogOut } from "lucide-react"
+import { Trophy, LogOut } from "lucide-react"
 import NavLinks from "@/components/NavLinks"
 
 export default async function NavHeader() {
@@ -14,9 +14,9 @@ export default async function NavHeader() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-            <BriefcaseBusiness size={16} />
+            <Trophy size={16} />
           </div>
-          <span className="text-sm font-bold text-slate-800">JobTrack</span>
+          <span className="text-sm font-black text-slate-800">就勝つ</span>
         </div>
         <NavLinks />
       </div>

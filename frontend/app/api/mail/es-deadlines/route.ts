@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import Anthropic from "@anthropic-ai/sdk"
 
-const BOX_LABEL_NAME = "JobTrack-ES-BOX"
+const BOX_LABEL_NAME = "Syukatu-ES-BOX"
 
 type GmailLabel = { id: string; name: string }
 type GmailLabelList = { labels?: GmailLabel[] }
@@ -235,7 +235,7 @@ export async function GET() {
   }
 }
 
-// 取り込み済みメールから JobTrack-ES-BOX ラベルを外す
+// 取り込み済みメールから Syukatu-ES-BOX ラベルを外す
 export async function POST(request: Request) {
   const session = await auth()
   const accessToken = session?.googleAccessToken

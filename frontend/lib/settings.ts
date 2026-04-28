@@ -5,7 +5,7 @@ export type AppSettings = {
   calendarSyncEnabled: boolean
 }
 
-export const APP_SETTINGS_KEY = "jobtrack.app-settings"
+export const APP_SETTINGS_KEY = "syukatu.app-settings"
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   showArchivedStatuses: false,
