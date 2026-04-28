@@ -49,6 +49,18 @@ export default function MailImportPanel() {
       if (!res.ok) throw new Error(data.detail ?? `HTTP ${res.status}`)
       setPreview(data)
       setSelected(new Set(data.items.map((i) => i.message_id)))
+
+      // 取得した時点でラベルを外す（次回フェッチで重複しない）
+      if (data.label_id && data.items.length > 0) {
+        await fetch("/api/mail/es-deadlines", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message_ids: data.items.map((i) => i.message_id),
+            label_id: data.label_id,
+          }),
+        }).catch(() => null)
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "メール取得に失敗しました")
     } finally {
@@ -101,14 +113,7 @@ export default function MailImportPanel() {
       }
     }
 
-    // 取り込み済みメールから Syukatu-ES-BOX ラベルを外す
-    if (done.length > 0 && preview.label_id) {
-      await fetch("/api/mail/es-deadlines", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message_ids: done, label_id: preview.label_id }),
-      }).catch(() => null)
-    }
+
 
     setImportDone(done)
     setSelected(new Set())
