@@ -11,6 +11,8 @@
 |-----------|------|------|
 | 1.0 | 2026-04-23 | 初版作成 |
 | 1.1 | 2026-04-23 | DBMS を MySQL → SQLite に変更。Docker 不要構成へ移行 |
+| 1.2 | 2026-04-26 | user_settings テーブル追加。companies に login_id 追加 |
+| 1.3 | 2026-04-27 | statuses デフォルトに「説明会」追加。本番DB を PostgreSQL（Neon）に移行 |
 
 ---
 
@@ -18,12 +20,12 @@
 
 | 項目 | 内容 |
 |------|------|
-| DBMS | SQLite 3（Python 標準搭載、インストール不要） |
+| DBMS（本番） | PostgreSQL（Neon、ap-southeast-1） |
+| DBMS（ローカル） | SQLite 3（`backend/jobtrack.db`、`.gitignore` 対象） |
 | ORM | SQLAlchemy 2.x |
 | マイグレーション | Alembic |
-| DBファイル | `backend/jobtrack.db`（`.gitignore` 対象） |
 
-> **変更理由:** Docker 不要の軽量ローカル開発環境のため SQLite を採用。本番移行時は `DATABASE_URL` を PostgreSQL/MySQL に変更するだけで対応可能（SQLAlchemy の抽象化による）。
+> **切り替え方法:** `DATABASE_URL` 環境変数を変更するだけでローカル（SQLite）↔ 本番（PostgreSQL）を切り替え可能（SQLAlchemy の抽象化による）。
 
 ---
 
@@ -62,6 +64,17 @@ erDiagram
         TINYINT     priority
         TEXT        notes
         VARCHAR(512) url
+        VARCHAR(255) login_id
+        DATETIME    created_at
+        DATETIME    updated_at
+    }
+
+    user_settings {
+        CHAR(36)    user_id                  PK FK
+        BOOLEAN     show_archived_statuses
+        BOOLEAN     compact_cards
+        INT         upcoming_refresh_minutes
+        BOOLEAN     calendar_sync_enabled
         DATETIME    created_at
         DATETIME    updated_at
     }
@@ -78,10 +91,11 @@ erDiagram
         DATETIME    updated_at
     }
 
-    users       ||--o{ statuses  : "保有する"
-    users       ||--o{ companies : "登録する"
-    statuses    ||--o{ companies : "分類する"
-    companies   ||--o{ events    : "持つ"
+    users       ||--o{ statuses       : "保有する"
+    users       ||--o{ companies      : "登録する"
+    users       ||--|| user_settings  : "持つ"
+    statuses    ||--o{ companies      : "分類する"
+    companies   ||--o{ events         : "持つ"
 ```
 
 ---
@@ -176,15 +190,16 @@ CREATE TABLE statuses (
 
 | position | name | color | is_archive |
 |---------|------|-------|-----------|
-| 1 | エントリー | #3B82F6 | FALSE |
-| 2 | ES提出 | #8B5CF6 | FALSE |
-| 3 | 書類選考 | #F59E0B | FALSE |
-| 4 | 一次面接 | #F97316 | FALSE |
-| 5 | 二次面接 | #EF4444 | FALSE |
-| 6 | 最終面接 | #EC4899 | FALSE |
-| 7 | 内定 | #10B981 | FALSE |
-| 8 | 不合格 | #6B7280 | TRUE |
-| 9 | 辞退 | #9CA3AF | TRUE |
+| 1 | 説明会 | #06B6D4 | FALSE |
+| 2 | エントリー | #3B82F6 | FALSE |
+| 3 | ES提出 | #8B5CF6 | FALSE |
+| 4 | 書類選考 | #F59E0B | FALSE |
+| 5 | 一次面接 | #F97316 | FALSE |
+| 6 | 二次面接 | #EF4444 | FALSE |
+| 7 | 最終面接 | #EC4899 | FALSE |
+| 8 | 内定 | #10B981 | FALSE |
+| 9 | 不合格 | #6B7280 | TRUE |
+| 10 | 辞退 | #9CA3AF | TRUE |
 
 ---
 
@@ -202,6 +217,7 @@ CREATE TABLE statuses (
 | priority | TINYINT | NOT NULL | 3 | 志望度（1=最高〜5=最低） |
 | notes | TEXT | NULL | NULL | メモ・備考 |
 | url | VARCHAR(512) | NULL | NULL | 企業サイト・マイページURL |
+| login_id | VARCHAR(255) | NULL | NULL | マイページのログインID |
 | created_at | DATETIME | NOT NULL | CURRENT_TIMESTAMP | レコード作成日時 |
 | updated_at | DATETIME | NOT NULL | CURRENT_TIMESTAMP | レコード更新日時 |
 
@@ -226,6 +242,7 @@ CREATE TABLE companies (
     priority   TINYINT      NOT NULL DEFAULT 3,
     notes      TEXT             NULL DEFAULT NULL,
     url        VARCHAR(512)     NULL DEFAULT NULL,
+    login_id   VARCHAR(255)     NULL DEFAULT NULL,
     created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP, -- updated_at は ORM (onupdate) で自動更新
     PRIMARY KEY (id),
@@ -233,7 +250,7 @@ CREATE TABLE companies (
     KEY idx_companies_user_updated (user_id, updated_at DESC),
     CONSTRAINT fk_companies_user   FOREIGN KEY (user_id)   REFERENCES users    (id) ON DELETE CASCADE,
     CONSTRAINT fk_companies_status FOREIGN KEY (status_id) REFERENCES statuses (id)
-) -- SQLite では ENGINE/CHARSET 指定は不要（Alembic が自動生成）
+)
 ```
 
 > **Note:** `status_id` の FK は `ON DELETE RESTRICT`（デフォルト）。ステータス削除前に companies をリジェクトし、UIで企業の移動先確認を促す。
@@ -293,7 +310,45 @@ CREATE TABLE events (
     KEY idx_events_company_schedule (company_id, scheduled_at),
     KEY idx_events_schedule         (scheduled_at),
     CONSTRAINT fk_events_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
-) -- SQLite では ENGINE/CHARSET 指定は不要（Alembic が自動生成）
+)
+```
+
+---
+
+### 3.5 user_settings（ユーザー設定）
+
+ユーザーごとのUI設定を管理する。`user_id` が PK であり、1ユーザー1レコード。
+
+| カラム名 | 型 | NULL | デフォルト | 説明 |
+|---------|-----|------|-----------|------|
+| user_id | CHAR(36) | NOT NULL | — | PK / FK → users.id |
+| show_archived_statuses | BOOLEAN | NOT NULL | FALSE | 不合格・辞退列の表示 |
+| compact_cards | BOOLEAN | NOT NULL | FALSE | カンバンカードのコンパクト表示 |
+| upcoming_refresh_minutes | INT | NOT NULL | 10 | 直近予定の自動更新間隔（1 / 5 / 10 分） |
+| calendar_sync_enabled | BOOLEAN | NOT NULL | TRUE | Googleカレンダー同期の有効・無効 |
+| created_at | DATETIME | NOT NULL | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | DATETIME | NOT NULL | CURRENT_TIMESTAMP | レコード更新日時 |
+
+**制約・インデックス**
+
+| 種別 | 対象カラム | 名称 |
+|------|-----------|------|
+| PRIMARY KEY | user_id | pk_user_settings |
+| FOREIGN KEY | user_id → users.id | fk_user_settings_user |
+
+**DDL**
+```sql
+CREATE TABLE user_settings (
+    user_id                  CHAR(36) NOT NULL,
+    show_archived_statuses   BOOLEAN  NOT NULL DEFAULT FALSE,
+    compact_cards            BOOLEAN  NOT NULL DEFAULT FALSE,
+    upcoming_refresh_minutes INT      NOT NULL DEFAULT 10,
+    calendar_sync_enabled    BOOLEAN  NOT NULL DEFAULT TRUE,
+    created_at               DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at               DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id),
+    CONSTRAINT fk_user_settings_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+)
 ```
 
 ---
@@ -304,6 +359,7 @@ CREATE TABLE events (
 |-----------|-----------|-----------|-----------|
 | users | statuses | user_id | CASCADE |
 | users | companies | user_id | CASCADE |
+| users | user_settings | user_id | CASCADE |
 | statuses | companies | status_id | RESTRICT |
 | companies | events | company_id | CASCADE |
 
