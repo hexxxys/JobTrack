@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends
-from ..deps import get_current_user
-from ...models.user import User
-from ...schemas.user import UserResponse
+from fastapi import APIRouter
 
-api_router = APIRouter()
+from app.api.v1 import calendar, companies, dashboard, events, statuses, user_settings
 
+api_router = APIRouter(prefix="/api")
 
-@api_router.get("/auth/me", response_model=UserResponse)
-def get_me(current_user: User = Depends(get_current_user)):
-    """ログイン中のユーザー情報を返す（動作確認用）"""
-    return current_user
+api_router.include_router(statuses.router)
+api_router.include_router(companies.router)
+api_router.include_router(events.router)
+api_router.include_router(calendar.router)
+api_router.include_router(dashboard.router)
+api_router.include_router(user_settings.router)

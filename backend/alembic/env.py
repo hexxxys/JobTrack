@@ -1,22 +1,30 @@
-import sys
 import os
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
+from pathlib import Path
+
 from alembic import context
+from dotenv import load_dotenv
+from sqlalchemy import engine_from_config, pool
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from app.models.base import Base
+from app.models.company import Company  # noqa: F401
+from app.models.event import Event  # noqa: F401
+from app.models.status import Status  # noqa: F401
+from app.models.user import User  # noqa: F401
+from app.models.user_settings import UserSettings  # noqa: F401
 
-from app.core.config import settings
-from app.core.database import Base
-from app.models import user  # noqa: モデルを登録するために必要
+# alembic コマンド実行時も .env を読み込む
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
+
+database_url = os.environ.get("DATABASE_URL", "sqlite:///./jobtrack.db")
+config.set_main_option("sqlalchemy.url", database_url)
 
 
 def run_migrations_offline() -> None:
