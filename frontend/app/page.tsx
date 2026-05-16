@@ -1,44 +1,19 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { signIn } from "@/auth"
-import { Trophy } from "lucide-react"
 
 export default async function LoginPage() {
   const session = await auth()
   if (session) redirect("/kanban")
 
   return (
-    <div className="flex min-h-full flex-col items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800">
-      <div className="w-full max-w-sm rounded-3xl bg-white/10 backdrop-blur-sm p-8 shadow-2xl ring-1 ring-white/20">
+    <div className="flex min-h-full flex-col items-center justify-center bg-white">
+      <div className="w-full max-w-sm px-6 py-12">
         {/* ロゴ */}
-        <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-lg">
-            <Trophy size={32} />
-          </div>
-          <div className="text-center">
-            <h1 className="text-3xl font-black text-white tracking-tight">就勝つ</h1>
-            <p className="mt-1 text-xs font-medium text-blue-200 tracking-widest uppercase">Syukatu</p>
-          </div>
+        <div className="mb-10 text-center">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">就勝つ</h1>
+          <p className="mt-2 text-sm text-slate-500">就活の選考を一元管理する</p>
         </div>
-
-        {/* キャッチコピー */}
-        <p className="mb-6 text-center text-sm text-blue-100">
-          就活の選考を一元管理して、<br />内定を勝ち取ろう。
-        </p>
-
-        {/* 特徴リスト */}
-        <ul className="mb-8 space-y-2">
-          {[
-            "カンバンボードで選考状況を可視化",
-            "ES締切・面接日のカウントダウン",
-            "メールから自動取り込み",
-          ].map((feature) => (
-            <li key={feature} className="flex items-center gap-2 text-sm text-blue-100">
-              <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/20 text-[10px] font-bold text-white">✓</span>
-              {feature}
-            </li>
-          ))}
-        </ul>
 
         {/* Google ログインボタン */}
         <form
@@ -49,9 +24,9 @@ export default async function LoginPage() {
         >
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-3 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-md transition-all hover:bg-blue-50 hover:shadow-lg active:scale-[0.98]"
+            className="flex w-full items-center justify-center gap-3 rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
           >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+            <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
@@ -60,11 +35,11 @@ export default async function LoginPage() {
             Googleでログイン
           </button>
         </form>
-      </div>
 
-      <p className="mt-6 text-xs text-blue-300">
-        ログインすることで利用規約に同意したものとみなします
-      </p>
+        <p className="mt-6 text-center text-xs text-slate-400">
+          ログインすることで利用規約に同意したものとみなします
+        </p>
+      </div>
     </div>
   )
 }

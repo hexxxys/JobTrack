@@ -1,7 +1,7 @@
 import { auth, signOut } from "@/auth"
 import { redirect } from "next/navigation"
 import Image from "next/image"
-import { Trophy, LogOut } from "lucide-react"
+import { LogOut } from "lucide-react"
 import NavLinks from "@/components/NavLinks"
 
 export default async function NavHeader() {
@@ -9,28 +9,27 @@ export default async function NavHeader() {
   if (!session) redirect("/")
 
   return (
-    <header className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+    <header className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-white px-6 py-3">
       {/* ロゴ + ナビゲーション */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-            <Trophy size={16} />
-          </div>
-          <span className="text-sm font-black text-slate-800">就勝つ</span>
-        </div>
+      <div className="flex items-center gap-6">
+        <span className="text-sm font-semibold text-slate-900">就勝つ</span>
         <NavLinks />
       </div>
 
       {/* ユーザー情報 */}
       <div className="flex items-center gap-3">
-        {session.user?.image && (
+        {session.user?.image ? (
           <Image
             src={session.user.image}
             alt={session.user.name ?? ""}
-            width={28}
-            height={28}
+            width={24}
+            height={24}
             className="rounded-full"
           />
+        ) : (
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-xs font-medium text-slate-600">
+            {session.user?.name?.[0]}
+          </div>
         )}
         <span className="hidden text-sm text-slate-600 sm:block">{session.user?.name}</span>
 
@@ -42,9 +41,9 @@ export default async function NavHeader() {
         >
           <button
             type="submit"
-            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+            className="flex items-center gap-1 rounded px-2 py-1 text-xs text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
           >
-            <LogOut size={13} />
+            <LogOut size={12} />
             ログアウト
           </button>
         </form>

@@ -15,7 +15,7 @@ export default function DashboardPage() {
 
         <SummaryCards />
 
-        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="rounded-lg border border-slate-100 bg-white p-5">
           <h2 className="text-sm font-semibold text-slate-700">直近スケジュール</h2>
           <div className="mt-3">
             <UpcomingList />
