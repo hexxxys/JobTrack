@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import uuid4
 
 from sqlalchemy import DateTime, ForeignKey, SmallInteger, String, Text, func
@@ -13,11 +14,11 @@ class Company(Base):
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     status_id: Mapped[str] = mapped_column(String(36), ForeignKey("statuses.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    industry: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    industry: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     priority: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=3)
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    url: Mapped[str | None] = mapped_column(String(512), nullable=True)
-    login_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    url: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
+    login_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime, nullable=False, server_default=func.now())
     updated_at: Mapped[DateTime] = mapped_column(
         DateTime, nullable=False, server_default=func.now(), onupdate=func.now()
